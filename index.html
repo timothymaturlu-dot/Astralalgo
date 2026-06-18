@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Astral Algo — Algorithmic Forex Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --ink:#040404;--deep:#080808;--surface:#0f0f0f;--card:#141414;--card2:#1a1a1a;
+  --rim:#252010;--rim2:rgba(200,162,60,.18);
+  --gold:#c8a23c;--gold2:#e2bc68;--gold3:#f4d98e;
+  --glow:rgba(200,162,60,.28);--glow2:rgba(200,162,60,.08);
+  --cream:#ede8d8;--fog:#7a7260;
+  --up:#4caf7d;--dn:#e05555;--blue:#5592e0;
+  --ff-d:'Cormorant Garamond',serif;--ff-b:'DM Sans',sans-serif;--ff-m:'JetBrains Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--ink);color:var(--cream);font-family:var(--ff-b);overflow-x:hidden}
+::selection{background:var(--gold);color:var(--ink)}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:var(--deep)}::-webkit-scrollbar-thumb{background:var(--gold);border-radius:2px}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:900;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;background:rgba(4,4,4,.95);backdrop-filter:blur(24px);border-bottom:1px solid var(--rim)}
+.nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;cursor:pointer}
+.nav-orb{width:32px;height:32px;border-radius:50%;border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;position:relative}
+.nav-orb::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:1px solid transparent;border-top-color:var(--gold);animation:spin 6s linear infinite;opacity:.35}
+@keyframes spin{to{transform:rotate(360deg)}}
+.nav-orb-star{color:var(--gold);font-size:14px}
+.nav-wordmark{font-family:var(--ff-d);font-size:20px;font-weight:600;color:var(--cream);letter-spacing:.04em}
+.nav-wordmark b{color:var(--gold);font-weight:700}
+.nav-links{display:flex;align-items:center;gap:2px;list-style:none}
+.nav-links a{padding:7px 13px;border-radius:4px;font-size:12px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--fog);text-decoration:none;transition:all .18s}
+.nav-links a:hover,.nav-links a.active{color:var(--gold);background:var(--glow2)}
+.nav-links .cta-link{background:var(--gold);color:var(--ink)!important;font-weight:700;padding:8px 18px;margin-left:6px}
+.nav-links .cta-link:hover{background:var(--gold2);box-shadow:0 0 20px var(--glow)}
+.burger{display:none;background:none;border:none;cursor:pointer;padding:6px;flex-direction:column;gap:5px}
+.burger span{display:block;width:20px;height:1.5px;background:var(--gold);border-radius:1px;transition:all .3s}
+.burger.open span:nth-child(1){transform:rotate(45deg) translate(4.5px,4.5px)}
+.burger.open span:nth-child(2){opacity:0}
+.burger.open span:nth-child(3){transform:rotate(-45deg) translate(4.5px,-4.5px)}
+.mob-nav{display:none;position:fixed;top:60px;left:0;right:0;z-index:899;background:rgba(4,4,4,.98);border-bottom:1px solid var(--rim);padding:12px 16px 20px;flex-direction:column;gap:4px}
+.mob-nav.open{display:flex}
+.mob-nav a{padding:13px 16px;border-radius:6px;font-size:14px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--fog);text-decoration:none;transition:all .18s;border:1px solid transparent}
+.mob-nav a:hover{color:var(--gold);background:var(--glow2);border-color:var(--rim)}
+.mob-nav .mob-cta{background:var(--gold);color:var(--ink);font-weight:700;text-align:center;margin-top:8px}
+
+/* PAGES */
+.page{display:none;min-height:100vh;padding-top:60px}
+.page.active{display:block}
+
+/* TICKER */
+.ticker-bar{overflow:hidden;height:36px;background:var(--surface);border-bottom:1px solid var(--rim);display:flex;align-items:center}
+.ticker-scroll{display:flex;gap:0;animation:tkscroll 40s linear infinite;white-space:nowrap;flex-shrink:0}
+.ticker-scroll:hover{animation-play-state:paused}
+@keyframes tkscroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.tk-item{display:inline-flex;align-items:center;gap:8px;padding:0 24px;border-right:1px solid var(--rim);height:36px;font-family:var(--ff-m);font-size:11px;flex-shrink:0}
+.tk-pair{color:var(--gold);font-weight:500;letter-spacing:.08em}
+.tk-price{color:var(--cream)}
+.tk-chg.up{color:var(--up)}.tk-chg.dn{color:var(--dn)}
+
+/* HERO */
+.hero{position:relative;overflow:hidden;min-height:calc(100vh - 96px);display:flex;align-items:center}
+.hero-mesh{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 70% 70% at 65% 25%,rgba(200,162,60,.07) 0%,transparent 55%),radial-gradient(ellipse 40% 50% at 5% 70%,rgba(200,162,60,.04) 0%,transparent 50%)}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(var(--rim) 1px,transparent 1px),linear-gradient(90deg,var(--rim) 1px,transparent 1px);background-size:64px 64px;opacity:.35;mask-image:radial-gradient(ellipse 80% 80% at 60% 40%,black 10%,transparent 70%)}
+.hero-inner{position:relative;z-index:2;width:100%;max-width:1280px;margin:0 auto;padding:60px 32px;display:grid;grid-template-columns:1fr 420px;gap:56px;align-items:center;min-height:calc(100vh - 96px)}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--glow2);border:1px solid var(--rim);border-radius:24px;padding:6px 14px;margin-bottom:26px;font-family:var(--ff-m);font-size:10.5px;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;animation:fadeUp .6s ease both}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--up);animation:pulse-d 1.6s ease-in-out infinite}
+@keyframes pulse-d{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.8)}}
+.hero-h{font-family:var(--ff-d);font-size:clamp(42px,5.5vw,78px);font-weight:300;line-height:1.05;color:var(--cream);margin-bottom:22px;animation:fadeUp .6s .1s ease both}
+.hero-h em{color:var(--gold);font-style:italic}
+.hero-h strong{font-weight:700;display:block}
+.hero-p{font-size:16px;color:var(--fog);line-height:1.75;max-width:500px;margin-bottom:38px;font-weight:300;animation:fadeUp .6s .2s ease both}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap;animation:fadeUp .6s .3s ease both}
+.btn-g{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--ink);font-family:var(--ff-b);font-weight:600;font-size:13px;letter-spacing:.07em;text-transform:uppercase;padding:14px 26px;border-radius:5px;border:none;cursor:pointer;transition:all .2s;text-decoration:none}
+.btn-g:hover{transform:translateY(-2px);box-shadow:0 10px 36px var(--glow)}
+.btn-o{display:inline-flex;align-items:center;gap:8px;background:transparent;color:var(--gold);font-family:var(--ff-b);font-weight:500;font-size:13px;letter-spacing:.07em;text-transform:uppercase;padding:14px 26px;border-radius:5px;border:1px solid var(--gold);cursor:pointer;transition:all .2s;text-decoration:none}
+.btn-o:hover{background:var(--glow2);box-shadow:0 0 24px var(--glow2)}
+.hero-stats{display:flex;gap:28px;margin-top:48px;flex-wrap:wrap;animation:fadeUp .6s .4s ease both}
+.hs{border-left:2px solid var(--gold);padding-left:14px}
+.hs-n{font-family:var(--ff-d);font-size:30px;font-weight:700;color:var(--gold2);line-height:1}
+.hs-l{font-size:11px;color:var(--fog);text-transform:uppercase;letter-spacing:.1em;margin-top:4px}
+
+/* Hero Panel */
+.hero-panel{background:var(--card);border:1px solid var(--rim);border-radius:14px;overflow:hidden;box-shadow:0 0 80px rgba(0,0,0,.6),0 0 40px var(--glow2),inset 0 1px 0 rgba(200,162,60,.12);animation:fadeRight .8s .2s ease both}
+.hp-head{background:var(--card2);padding:13px 18px;border-bottom:1px solid var(--rim);display:flex;align-items:center;justify-content:space-between}
+.hp-title{font-family:var(--ff-m);font-size:10px;color:var(--gold);letter-spacing:.14em;text-transform:uppercase}
+.hp-live{display:flex;align-items:center;gap:5px;font-family:var(--ff-m);font-size:10px;color:var(--up)}
+.rate-row{display:flex;align-items:center;justify-content:space-between;padding:11px 18px;border-bottom:1px solid rgba(255,255,255,.035);transition:background .18s;cursor:default}
+.rate-row:hover{background:rgba(200,162,60,.04)}
+.rr-pair{font-family:var(--ff-m);font-size:13px;font-weight:500;color:var(--cream);letter-spacing:.06em;min-width:68px}
+.rr-price{font-family:var(--ff-m);font-size:13px;color:var(--cream)}
+.rr-chg{font-family:var(--ff-m);font-size:11px;font-weight:500;padding:3px 8px;border-radius:3px;min-width:60px;text-align:right}
+.rr-chg.up{color:var(--up);background:rgba(76,175,125,.12)}
+.rr-chg.dn{color:var(--dn);background:rgba(224,85,85,.12)}
+.hp-signal{padding:14px 18px;background:linear-gradient(135deg,rgba(200,162,60,.07),transparent);border-top:1px solid var(--rim)}
+.hps-label{font-family:var(--ff-m);font-size:9px;color:var(--gold);text-transform:uppercase;letter-spacing:.14em;margin-bottom:9px}
+.hps-card{display:flex;align-items:center;gap:10px;padding:11px 13px;background:rgba(76,175,125,.07);border:1px solid rgba(76,175,125,.2);border-radius:7px}
+.hps-dir{font-family:var(--ff-m);font-size:12px;font-weight:700;color:var(--up);text-transform:uppercase;letter-spacing:.06em;min-width:32px}
+.hps-info{flex:1;font-family:var(--ff-m);font-size:11px;color:var(--fog);line-height:1.5}
+.hps-pip{font-family:var(--ff-m);font-size:12px;color:var(--gold2)}
+.hp-footer{padding:11px 18px;border-top:1px solid var(--rim);display:flex;align-items:center;justify-content:space-between}
+.hp-count{font-family:var(--ff-m);font-size:10px;color:var(--fog)}
+.hp-btn{font-family:var(--ff-m);font-size:10px;color:var(--gold);text-decoration:none;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--rim);border-radius:3px;padding:4px 10px;transition:all .18s;cursor:pointer;background:none}
+.hp-btn:hover{border-color:var(--gold);background:var(--glow2)}
+
+/* SECTION COMMONS */
+.sec-tag{font-family:var(--ff-m);font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:.16em;margin-bottom:12px}
+.sec-h{font-family:var(--ff-d);font-size:clamp(30px,4vw,50px);font-weight:300;color:var(--cream);line-height:1.15;margin-bottom:16px}
+.sec-h em{color:var(--gold);font-style:italic}
+.sec-p{font-size:15px;color:var(--fog);max-width:520px;line-height:1.8;font-weight:300}
+.gold-rule{width:56px;height:2px;background:linear-gradient(90deg,var(--gold),transparent);margin:18px 0}
+
+/* HOME FEATURES */
+.home-feats{background:var(--surface);border-top:1px solid var(--rim);border-bottom:1px solid var(--rim);padding:80px 32px}
+.hf-inner{max-width:1280px;margin:0 auto}
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin-top:48px}
+.feat-card{background:var(--card);border:1px solid var(--rim);border-radius:10px;padding:26px;transition:all .28s;position:relative;overflow:hidden}
+.feat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,var(--gold),transparent);opacity:0;transition:opacity .28s}
+.feat-card:hover{border-color:var(--gold);transform:translateY(-3px);box-shadow:0 12px 40px var(--glow2)}
+.feat-card:hover::after{opacity:1}
+.feat-ico{width:42px;height:42px;border-radius:8px;background:var(--glow2);border:1px solid var(--rim);display:flex;align-items:center;justify-content:center;font-size:19px;margin-bottom:16px}
+.feat-t{font-size:15px;font-weight:600;color:var(--cream);letter-spacing:.02em;margin-bottom:9px}
+.feat-d{font-size:13px;color:var(--fog);line-height:1.75;font-weight:300}
+
+/* PAGE WRAPPER */
+.pg-wrap{max-width:1280px;margin:0 auto;padding:28px 28px 72px}
+.pg-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:16px}
+.pg-title{font-family:var(--ff-d);font-size:clamp(26px,4vw,44px);font-weight:300;color:var(--cream)}
+.pg-title em{color:var(--gold);font-style:italic}
+.pill-bar{display:flex;gap:8px;flex-wrap:wrap}
+.pill{background:var(--card);border:1px solid var(--rim);border-radius:20px;padding:6px 15px;font-family:var(--ff-m);font-size:10px;color:var(--fog);cursor:pointer;transition:all .18s;text-transform:uppercase;letter-spacing:.08em}
+.pill:hover,.pill.on{border-color:var(--gold);color:var(--gold);background:var(--glow2)}
+
+/* PROPFIRM PANEL */
+.pf-panel{background:var(--card);border:1px solid var(--rim);border-radius:12px;overflow:hidden;margin-bottom:24px}
+.pf-head{background:var(--card2);padding:14px 20px;border-bottom:1px solid var(--rim);display:flex;align-items:center;gap:10px}
+.pf-head h3{font-size:14px;font-weight:600;color:var(--cream);letter-spacing:.02em}
+.pf-body{padding:18px 20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px}
+.pf-rule{padding:14px 16px;background:var(--surface);border:1px solid var(--rim);border-radius:8px}
+.pf-rule-name{font-family:var(--ff-m);font-size:9.5px;color:var(--gold);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+.pf-rule-val{font-family:var(--ff-m);font-size:14px;font-weight:500;margin-bottom:3px}
+.pf-rule-sub{font-size:11px;color:var(--fog);font-weight:300}
+.ok{color:var(--up)}.warn{color:var(--gold2)}.bad{color:var(--dn)}
+
+/* SIGNAL CARDS */
+.sig-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:16px;margin-bottom:36px}
+.sig-card{background:var(--card);border:1px solid var(--rim);border-radius:10px;overflow:hidden;transition:all .28s}
+.sig-card:hover{border-color:var(--gold);box-shadow:0 6px 32px var(--glow2)}
+.sc-head{padding:14px 17px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--rim)}
+.sc-pair{font-family:var(--ff-m);font-size:15px;font-weight:500;color:var(--cream);letter-spacing:.06em}
+.sc-dir{font-family:var(--ff-m);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 13px;border-radius:4px}
+.sc-dir.buy{background:rgba(76,175,125,.14);color:var(--up);border:1px solid rgba(76,175,125,.28)}
+.sc-dir.sell{background:rgba(224,85,85,.14);color:var(--dn);border:1px solid rgba(224,85,85,.28)}
+.sc-body{padding:15px 17px}
+.sc-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;font-size:13px}
+.sc-row:last-child{margin-bottom:0}
+.sc-k{color:var(--fog);font-weight:300}
+.sc-v{font-family:var(--ff-m);font-size:13px;color:var(--cream)}
+.sc-v.tp{color:var(--up)}.sc-v.sl{color:var(--dn)}.sc-v.au{color:var(--gold2)}
+.sc-bar{margin:10px 17px 0;height:2.5px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden}
+.sc-bar-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:2px}
+.sc-foot{padding:10px 17px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--rim);background:var(--card2)}
+.sc-time{font-family:var(--ff-m);font-size:10px;color:var(--fog)}
+.sc-tag2{font-family:var(--ff-m);font-size:9px;padding:3px 8px;border-radius:3px;background:var(--glow2);color:var(--gold);letter-spacing:.06em;text-transform:uppercase}
+
+/* TELEGRAM */
+.tg-wrap{max-width:1000px;margin:0 auto;padding:28px 28px 72px}
+.tg-hero-box{background:var(--card);border:1px solid var(--rim);border-radius:14px;padding:32px;display:flex;align-items:center;gap:28px;flex-wrap:wrap;margin-bottom:24px;position:relative;overflow:hidden}
+.tg-hero-box::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 60% at 0% 50%,rgba(34,158,217,.07),transparent 55%);pointer-events:none}
+.tg-ico{width:68px;height:68px;border-radius:16px;flex-shrink:0;background:linear-gradient(135deg,#229ED9,#1677a8);display:flex;align-items:center;justify-content:center;font-size:32px;box-shadow:0 0 30px rgba(34,158,217,.3)}
+.tg-hero-content{flex:1;min-width:200px;position:relative;z-index:1}
+.tg-hero-title{font-family:var(--ff-d);font-size:26px;font-weight:600;color:var(--cream);margin-bottom:8px}
+.tg-hero-desc{font-size:14px;color:var(--fog);line-height:1.7;font-weight:300;max-width:420px}
+.btn-tg{background:#229ED9;color:#fff;border:none;border-radius:6px;padding:13px 24px;font-family:var(--ff-b);font-weight:600;font-size:13px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0}
+.btn-tg:hover{background:#1a7db5;transform:translateY(-1px);box-shadow:0 8px 24px rgba(34,158,217,.3)}
+.tg-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.tg-sec{background:var(--card);border:1px solid var(--rim);border-radius:12px;overflow:hidden}
+.ts-hd{background:var(--card2);padding:14px 20px;border-bottom:1px solid var(--rim);display:flex;align-items:center;gap:8px}
+.ts-hd h3{font-size:14px;font-weight:600;color:var(--cream)}
+.ts-bd{padding:20px}
+.f-lbl{display:block;font-family:var(--ff-m);font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px}
+.f-inp,.f-sel{width:100%;background:var(--deep);border:1px solid var(--rim);border-radius:6px;padding:11px 14px;font-family:var(--ff-m);font-size:13px;color:var(--cream);transition:border-color .18s;appearance:none;outline:none}
+.f-inp:focus,.f-sel:focus{border-color:var(--gold)}
+.f-inp::placeholder{color:var(--fog)}
+.fg{margin-bottom:16px}.fg:last-child{margin-bottom:0}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.tog-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.tog-row:last-child{border-bottom:none}
+.tog-lbl{font-size:13px;color:var(--cream)}
+.tog-sub{font-size:11px;color:var(--fog);margin-top:2px;font-weight:300}
+.tog{width:40px;height:22px;border-radius:11px;background:var(--rim);position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+.tog.on{background:var(--gold)}
+.tog::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s}
+.tog.on::after{transform:translateX(18px)}
+.msg-box{background:var(--deep);border:1px solid var(--rim);border-radius:9px;padding:18px;margin-top:18px}
+.msg-box-lbl{font-family:var(--ff-m);font-size:9px;color:var(--fog);text-transform:uppercase;letter-spacing:.12em;margin-bottom:12px}
+.msg-pre{font-family:var(--ff-m);font-size:12.5px;line-height:1.9;color:var(--cream);white-space:pre-line}
+.mg{color:var(--gold2)}.mb{color:var(--up)}.mr{color:var(--dn)}.mm{color:var(--fog)}
+
+/* MEETINGS */
+.meet-wrap{max-width:1280px;margin:0 auto;padding:28px 28px 72px}
+.sessions-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px;margin-bottom:32px}
+.sess-card{background:var(--card);border:1px solid var(--rim);border-radius:10px;overflow:hidden;transition:all .28s;cursor:pointer}
+.sess-card:hover{border-color:var(--gold);transform:translateY(-3px);box-shadow:0 10px 36px var(--glow2)}
+.sess-thumb{height:124px;background:var(--deep);position:relative;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--rim);overflow:hidden}
+.sess-thumb-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 30% 50%,rgba(200,162,60,.1),transparent 55%)}
+.live-tag{position:absolute;top:9px;left:9px;background:var(--dn);color:#fff;font-family:var(--ff-m);font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:4px 8px;border-radius:3px;display:flex;align-items:center;gap:5px}
+.live-tag .d{width:5px;height:5px;border-radius:50%;background:#fff;animation:pulse-d 1s infinite}
+.sess-ico{font-size:34px;position:relative;z-index:1}
+.sess-body{padding:15px 17px}
+.sess-title{font-family:var(--ff-d);font-size:17px;font-weight:600;color:var(--cream);margin-bottom:9px;line-height:1.3}
+.sess-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.stag{font-family:var(--ff-m);font-size:9.5px;text-transform:uppercase;letter-spacing:.08em;padding:3px 8px;border-radius:3px}
+.stag.live{background:rgba(224,85,85,.14);color:var(--dn);border:1px solid rgba(224,85,85,.28)}
+.stag.class{background:var(--glow2);color:var(--gold);border:1px solid var(--rim)}
+.stag.rec{background:rgba(85,146,224,.12);color:var(--blue);border:1px solid rgba(85,146,224,.25)}
+.stag.soon{background:rgba(76,175,125,.1);color:var(--up);border:1px solid rgba(76,175,125,.22)}
+.sess-time{font-family:var(--ff-m);font-size:10px;color:var(--fog)}
+.sess-foot{padding:11px 17px;border-top:1px solid var(--rim);display:flex;align-items:center;justify-content:space-between}
+.sess-att{font-family:var(--ff-m);font-size:10px;color:var(--fog)}
+.join-btn{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--ink);border:none;border-radius:4px;padding:7px 16px;font-family:var(--ff-b);font-weight:700;font-size:11px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.join-btn:hover{box-shadow:0 0 20px var(--glow)}
+.join-btn.out{background:transparent;color:var(--gold);border:1px solid var(--gold)}
+.join-btn.out:hover{background:var(--glow2)}
+
+/* ROOM */
+.room{background:var(--card);border:1px solid var(--rim);border-radius:14px;overflow:hidden;margin-top:10px}
+.room-vid{aspect-ratio:16/9;background:var(--deep);position:relative;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--rim);overflow:hidden}
+.room-vid-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,rgba(200,162,60,.04),transparent 60%),linear-gradient(180deg,#0a0a0a,#0f0f0f)}
+.room-ph{position:relative;z-index:1;text-align:center}
+.room-ph-ico{font-size:52px;margin-bottom:16px;display:block}
+.room-ph-h{font-family:var(--ff-d);font-size:28px;color:var(--fog);font-weight:300}
+.room-ph-s{font-family:var(--ff-m);font-size:11px;color:rgba(122,114,96,.5);margin-top:8px}
+.speakers{position:absolute;bottom:16px;right:16px;display:flex;gap:8px;z-index:2}
+.spk-tile{width:96px;height:72px;border-radius:8px;background:var(--card2);border:1px solid var(--rim);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:22px}
+.spk-name{font-family:var(--ff-m);font-size:9px;color:var(--fog)}
+.room-controls{display:flex;align-items:center;justify-content:center;gap:10px;padding:16px;flex-wrap:wrap;background:var(--card2)}
+.ctrl{width:46px;height:46px;border-radius:50%;background:var(--surface);border:1px solid var(--rim);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;transition:all .18s}
+.ctrl:hover{border-color:var(--gold);background:var(--glow2)}
+.ctrl.danger{background:rgba(224,85,85,.14);border-color:rgba(224,85,85,.28)}
+.ctrl.danger:hover{background:var(--dn);border-color:var(--dn)}
+.room-lower{border-top:1px solid var(--rim);display:grid;grid-template-columns:1fr 1fr 1fr}
+.rl-panel{padding:16px 18px;border-right:1px solid var(--rim)}
+.rl-panel:last-child{border-right:none}
+.rl-label{font-family:var(--ff-m);font-size:9px;color:var(--gold);text-transform:uppercase;letter-spacing:.14em;margin-bottom:12px}
+.chat-bubble{display:flex;gap:9px;margin-bottom:12px}
+.cb-av{width:26px;height:26px;border-radius:50%;flex-shrink:0;background:var(--glow2);border:1px solid var(--rim);display:flex;align-items:center;justify-content:center;font-size:11px}
+.cb-body{flex:1}
+.cb-name{font-family:var(--ff-m);font-size:9px;color:var(--gold);margin-bottom:3px}
+.cb-text{font-size:12px;color:var(--cream);line-height:1.55;font-weight:300}
+.participant-row{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.03)}
+.participant-row:last-child{border-bottom:none}
+.pr-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.pr-name{font-size:13px;color:var(--cream);flex:1}
+.pr-role{font-family:var(--ff-m);font-size:9px;padding:2px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:.06em}
+.r-host{background:var(--glow2);color:var(--gold)}.r-mem{background:rgba(85,146,224,.1);color:var(--blue)}
+.msig{display:flex;align-items:center;gap:10px;padding:9px 11px;background:var(--surface);border:1px solid var(--rim);border-radius:6px;margin-bottom:8px;transition:border-color .18s}
+.msig:hover{border-color:var(--gold)}.msig:last-child{margin-bottom:0}
+.msig-dir{font-family:var(--ff-m);font-size:10px;font-weight:700;min-width:32px}
+.msig-dir.buy{color:var(--up)}.msig-dir.sell{color:var(--dn)}
+.msig-pair{font-family:var(--ff-m);font-size:12px;color:var(--cream);min-width:66px}
+.msig-info{font-size:11px;color:var(--fog);flex:1}
+.msig-st{font-family:var(--ff-m);font-size:9px;padding:2px 7px;border-radius:3px}
+.msig-st.act{background:rgba(76,175,125,.1);color:var(--up);border:1px solid rgba(76,175,125,.2)}
+.msig-st.cls{background:rgba(122,114,96,.1);color:var(--fog)}
+
+/* PRICING */
+.price-wrap{max-width:1100px;margin:0 auto;padding:28px 28px 80px}
+.price-toggle{display:flex;align-items:center;gap:14px;margin-bottom:44px;font-size:13px;color:var(--fog)}
+.pt{width:48px;height:26px;border-radius:13px;background:var(--gold);position:relative;cursor:pointer}
+.pt::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--ink);transition:transform .28s}
+.pt.ann::after{transform:translateX(22px)}
+.save-tag{background:var(--glow2);border:1px solid var(--rim);color:var(--gold);font-family:var(--ff-m);font-size:9.5px;padding:3px 9px;border-radius:10px;letter-spacing:.08em;text-transform:uppercase}
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.plan{background:var(--card);border:1px solid var(--rim);border-radius:12px;overflow:hidden;transition:all .3s}
+.plan:hover{border-color:var(--gold);transform:translateY(-4px);box-shadow:0 16px 48px var(--glow2)}
+.plan.hot{border-color:var(--gold);box-shadow:0 0 48px var(--glow2)}
+.plan-badge{background:var(--gold);color:var(--ink);text-align:center;padding:7px;font-family:var(--ff-m);font-size:9.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.plan-h{padding:26px 24px 20px;border-bottom:1px solid var(--rim)}
+.plan-name{font-family:var(--ff-d);font-size:28px;font-weight:600;color:var(--cream);margin-bottom:5px}
+.plan-tag{font-size:12px;color:var(--fog);font-weight:300;margin-bottom:18px}
+.plan-price{font-family:var(--ff-d);font-size:52px;font-weight:700;color:var(--gold2);line-height:1}
+.plan-price sup{font-size:22px;font-weight:300;color:var(--fog)}
+.plan-price sub{font-size:18px;font-weight:300;color:var(--fog)}
+.plan-per{font-size:12px;color:var(--fog);margin-top:5px}
+.plan-feats{padding:20px 24px}
+.pf{display:flex;align-items:flex-start;gap:10px;margin-bottom:13px;font-size:13px;font-weight:300;line-height:1.45}
+.pf .ck{color:var(--gold);flex-shrink:0;margin-top:1px}.pf .cx{color:var(--fog);flex-shrink:0}
+.pf.dim{color:var(--fog)}
+.plan-foot{padding:0 24px 28px}
+.btn-plan{width:100%;padding:14px;border-radius:5px;font-family:var(--ff-b);font-weight:600;font-size:13px;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;transition:all .2s;border:1px solid var(--gold);color:var(--gold);background:transparent}
+.btn-plan:hover{background:var(--glow2)}
+.btn-plan.prime{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--ink);border:none}
+.btn-plan.prime:hover{box-shadow:0 8px 28px var(--glow)}
+.disclaimer{background:rgba(200,162,60,.04);border:1px solid var(--rim);border-radius:7px;padding:14px 18px;margin-bottom:36px;font-family:var(--ff-m);font-size:10.5px;color:var(--fog);line-height:1.65;letter-spacing:.02em}
+
+/* FOOTER */
+footer{border-top:1px solid var(--rim);padding:52px 32px 32px;max-width:1280px;margin:0 auto}
+.ft-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px}
+.ft-brand p{font-size:13px;color:var(--fog);line-height:1.75;margin-top:12px;font-weight:300;max-width:260px}
+.ft-col h4{font-family:var(--ff-m);font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:.14em;margin-bottom:16px}
+.ft-col a{display:block;color:var(--fog);text-decoration:none;font-size:13px;font-weight:300;margin-bottom:10px;transition:color .18s}
+.ft-col a:hover{color:var(--gold)}
+.ft-bottom{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding-top:22px;border-top:1px solid var(--rim);font-family:var(--ff-m);font-size:10px;color:var(--fog);letter-spacing:.04em}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeRight{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:translateX(0)}}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .hero-inner{grid-template-columns:1fr;gap:36px;padding:36px 20px;min-height:auto}
+  .hero-panel{max-width:420px}
+  .room-lower{grid-template-columns:1fr}
+  .rl-panel{border-right:none;border-bottom:1px solid var(--rim)}
+  .rl-panel:last-child{border-bottom:none}
+  .tg-grid{grid-template-columns:1fr}
+}
+@media(max-width:768px){
+  nav{padding:0 16px}
+  .nav-links{display:none}
+  .burger{display:flex}
+  .pg-wrap,.meet-wrap,.price-wrap,.tg-wrap{padding:18px 16px 56px}
+  .home-feats{padding:52px 20px}
+  .ft-grid{grid-template-columns:1fr 1fr;gap:28px}
+}
+@media(max-width:500px){
+  .hero-h{font-size:36px}
+  .hero-stats{flex-wrap:wrap;gap:16px}
+  .hero-btns{flex-direction:column}
+  .btn-g,.btn-o{width:100%;justify-content:center}
+  .fr2{grid-template-columns:1fr}
+  .plans{grid-template-columns:1fr}
+  .ft-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand" onclick="showPage('home')">
+    <div class="nav-orb"><span class="nav-orb-star">✦</span></div>
+    <span class="nav-wordmark">Astral<b>Algo</b></span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#" id="nl-home" class="active" onclick="showPage('home');return false">Home</a></li>
+    <li><a href="#" id="nl-signals" onclick="showPage('signals');return false">Signals</a></li>
+    <li><a href="#" id="nl-meetings" onclick="showPage('meetings');return false">Sessions</a></li>
+    <li><a href="#" id="nl-telegram" onclick="showPage('telegram');return false">Bot Setup</a></li>
+    <li><a href="#" id="nl-pricing" onclick="showPage('pricing');return false">Pricing</a></li>
+    <li><a href="#" class="cta-link" onclick="showPage('pricing');return false">Subscribe</a></li>
+  </ul>
+  <button class="burger" id="burger" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+<div class="mob-nav" id="mob-nav">
+  <a href="#" onclick="showPage('home');return false">Home</a>
+  <a href="#" onclick="showPage('signals');return false">Signals</a>
+  <a href="#" onclick="showPage('meetings');return false">Sessions</a>
+  <a href="#" onclick="showPage('telegram');return false">Bot Setup</a>
+  <a href="#" onclick="showPage('pricing');return false">Pricing</a>
+  <a href="#" class="mob-cta" onclick="showPage('pricing');return false">Subscribe Now</a>
+</div>
+
+<!-- ════════════════ HOME ════════════════ -->
+<div id="page-home" class="page active">
+  <div class="ticker-bar"><div class="ticker-scroll" id="ticker-scroll"></div></div>
+  <section class="hero">
+    <div class="hero-mesh"></div><div class="hero-grid"></div>
+    <div class="hero-inner">
+      <div>
+        <div class="hero-eyebrow"><span class="live-dot"></span>Live Algorithmic Signals — PropFirm Ready</div>
+        <h1 class="hero-h">Trade with<br><em>Algorithmic</em><br><strong>Precision</strong></h1>
+        <p class="hero-p">Astral Algo delivers institutional-grade forex signals, real-time Telegram alerts, and live trading sessions — engineered for prop firm compliance and consistent profitability.</p>
+        <div class="hero-btns">
+          <a href="#" class="btn-g" onclick="showPage('signals');return false">⚡ View Live Signals</a>
+          <a href="#" class="btn-o" onclick="showPage('pricing');return false">✦ See Plans</a>
+        </div>
+        <div class="hero-stats">
+          <div class="hs"><div class="hs-n">94.2%</div><div class="hs-l">Signal Accuracy</div></div>
+          <div class="hs"><div class="hs-n">3,800+</div><div class="hs-l">Active Traders</div></div>
+          <div class="hs"><div class="hs-n">12 Pairs</div><div class="hs-l">Covered Daily</div></div>
+        </div>
+      </div>
+      <div class="hero-panel">
+        <div class="hp-head">
+          <span class="hp-title">// Live Markets</span>
+          <span class="hp-live"><span class="live-dot"></span>&nbsp;Real-time</span>
+        </div>
+        <div id="live-rates"></div>
+        <div class="hp-signal">
+          <div class="hps-label">// Latest Signal</div>
+          <div class="hps-card">
+            <span class="hps-dir">BUY</span>
+            <div class="hps-info">XAUUSD · Entry 2341.50<br>TP1 2354 · SL 2332</div>
+            <span class="hps-pip">+82p</span>
+          </div>
+        </div>
+        <div class="hp-footer">
+          <span class="hp-count">↑ 8 signals active today</span>
+          <button class="hp-btn" onclick="showPage('signals')">View All →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div class="home-feats">
+    <div class="hf-inner">
+      <div class="sec-tag">// Why Astral Algo</div>
+      <h2 class="sec-h">Built for <em>Prop Firm</em> Champions</h2>
+      <div class="gold-rule"></div>
+      <p class="sec-p">Every signal is engineered around strict drawdown limits, news filters, and risk parameters that keep you inside the rules of FTMO, MyFundedFx, and beyond.</p>
+      <div class="feat-grid">
+        <div class="feat-card"><div class="feat-ico">🎯</div><div class="feat-t">PropFirm-Safe Signals</div><div class="feat-d">Signals filtered for max 1% risk per trade, no high-impact news entries, and session-aware timing for phase compliance.</div></div>
+        <div class="feat-card"><div class="feat-ico">📡</div><div class="feat-t">Instant Telegram Alerts</div><div class="feat-d">Receive buy/sell alerts with entry, TP1–TP3, SL, and lot guidance directly to your group within milliseconds of generation.</div></div>
+        <div class="feat-card"><div class="feat-ico">🎓</div><div class="feat-t">Live Trading Sessions</div><div class="feat-d">Join weekly masterclasses, live trade commentary, and interactive Q&amp;A sessions hosted directly in-platform.</div></div>
+        <div class="feat-card"><div class="feat-ico">📊</div><div class="feat-t">Algo-Powered Analysis</div><div class="feat-d">Our engine scans structure, order flow, liquidity zones, and momentum across 12 major and minor pairs 24/5.</div></div>
+        <div class="feat-card"><div class="feat-ico">🛡️</div><div class="feat-t">Risk Management Suite</div><div class="feat-d">Built-in lot size calculator, equity curve tracker, and daily loss limit alerts prevent account violations.</div></div>
+        <div class="feat-card"><div class="feat-ico">🌐</div><div class="feat-t">Multi-Session Coverage</div><div class="feat-d">London open, New York session, and Asian range breakouts covered around the clock with session-tagged signals.</div></div>
+      </div>
+    </div>
+  </div>
+  <footer>
+    <div class="ft-grid">
+      <div class="ft-brand">
+        <div class="nav-brand" style="margin-bottom:0"><div class="nav-orb" style="width:28px;height:28px"><span style="color:var(--gold);font-size:12px">✦</span></div><span class="nav-wordmark" style="font-size:17px">Astral<b>Algo</b></span></div>
+        <p>Algorithmic forex intelligence engineered for prop firm traders who demand precision, discipline, and consistent results.</p>
+      </div>
+      <div class="ft-col"><h4>Platform</h4><a href="#" onclick="showPage('signals');return false">Live Signals</a><a href="#" onclick="showPage('meetings');return false">Sessions</a><a href="#" onclick="showPage('telegram');return false">Bot Setup</a><a href="#" onclick="showPage('pricing');return false">Pricing</a></div>
+      <div class="ft-col"><h4>Resources</h4><a href="#">PropFirm Guide</a><a href="#">Risk Calculator</a><a href="#">Trade Journal</a><a href="#">FAQ</a></div>
+      <div class="ft-col"><h4>Legal</h4><a href="#">Terms of Service</a><a href="#">Privacy Policy</a><a href="#">Risk Disclaimer</a><a href="#">Refund Policy</a></div>
+    </div>
+    <div class="ft-bottom"><span>© 2026 Astral Algo. All rights reserved.</span><span>Not financial advice. Trading involves substantial risk.</span></div>
+  </footer>
+</div>
+
+<!-- ════════════════ SIGNALS ════════════════ -->
+<div id="page-signals" class="page">
+  <div class="pg-wrap">
+    <div class="pg-head">
+      <div><div class="sec-tag" style="margin-bottom:6px">// Signal Dashboard</div><h2 class="pg-title">Live Forex <em>Signals</em></h2></div>
+      <div class="pill-bar">
+        <span class="pill on" onclick="filterSigs(this,'all')">All</span>
+        <span class="pill" onclick="filterSigs(this,'buy')">Buy</span>
+        <span class="pill" onclick="filterSigs(this,'sell')">Sell</span>
+        <span class="pill" onclick="filterSigs(this,'active')">Active</span>
+        <span class="pill" onclick="filterSigs(this,'closed')">Closed</span>
+      </div>
+    </div>
+    <div class="pf-panel">
+      <div class="pf-head"><span style="font-size:16px">🛡️</span><h3>PropFirm Compliance Monitor</h3></div>
+      <div class="pf-body">
+        <div class="pf-rule"><div class="pf-rule-name">Daily Loss</div><div class="pf-rule-val ok">-1.2%</div><div class="pf-rule-sub">Limit: -5% ✓ Safe</div></div>
+        <div class="pf-rule"><div class="pf-rule-name">Max Drawdown</div><div class="pf-rule-val ok">-3.8%</div><div class="pf-rule-sub">Limit: -10% ✓ Safe</div></div>
+        <div class="pf-rule"><div class="pf-rule-name">Risk / Trade</div><div class="pf-rule-val ok">0.5%</div><div class="pf-rule-sub">Max 1% enforced</div></div>
+        <div class="pf-rule"><div class="pf-rule-name">News Filter</div><div class="pf-rule-val ok">Active</div><div class="pf-rule-sub">30 min buffer on</div></div>
+        <div class="pf-rule"><div class="pf-rule-name">Open Trades</div><div class="pf-rule-val warn">3 / 5</div><div class="pf-rule-sub">2 slots remaining</div></div>
+        <div class="pf-rule"><div class="pf-rule-name">Phase Status</div><div class="pf-rule-val ok">On Track</div><div class="pf-rule-sub">Profit: +4.1%</div></div>
+      </div>
+    </div>
+    <div class="sig-grid" id="sig-grid"></div>
+    <div style="background:var(--card);border:1px solid var(--rim);border-radius:12px;padding:26px;display:flex;align-items:center;gap:22px;flex-wrap:wrap">
+      <div style="font-size:32px">📨</div>
+      <div style="flex:1;min-width:180px"><div style="font-family:var(--ff-d);font-size:20px;font-weight:600;color:var(--cream);margin-bottom:6px">Get Signals on Telegram</div><div style="font-size:13px;color:var(--fog);font-weight:300">Never miss an entry. All signals push to your private group within seconds.</div></div>
+      <button class="btn-g" onclick="showPage('telegram')">⚡ Setup Bot</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ MEETINGS ════════════════ -->
+<div id="page-meetings" class="page">
+  <div class="meet-wrap">
+    <div class="pg-head">
+      <div><div class="sec-tag" style="margin-bottom:6px">// Live Rooms</div><h2 class="pg-title">Trading <em>Sessions</em></h2></div>
+      <button class="btn-g">+ Schedule Session</button>
+    </div>
+    <div class="sessions-grid">
+      <div class="sess-card">
+        <div class="sess-thumb"><div class="sess-thumb-bg"></div><div class="live-tag"><span class="d"></span>LIVE</div><span class="sess-ico">📈</span></div>
+        <div class="sess-body"><div class="sess-title">NY Session Live Trade — XAUUSD &amp; GBPUSD</div><div class="sess-meta"><span class="stag live">Live Now</span><span class="sess-time">Started 14:02 UTC</span></div></div>
+        <div class="sess-foot"><span class="sess-att">👥 142 watching</span><button class="join-btn" onclick="openRoom()">Join Now</button></div>
+      </div>
+      <div class="sess-card">
+        <div class="sess-thumb"><div class="sess-thumb-bg"></div><span class="sess-ico">🎓</span></div>
+        <div class="sess-body"><div class="sess-title">Prop Firm Phase 1 Masterclass</div><div class="sess-meta"><span class="stag class">Class</span><span class="sess-time">Today 18:00 UTC</span></div></div>
+        <div class="sess-foot"><span class="sess-att">👥 67 registered</span><button class="join-btn out">Remind Me</button></div>
+      </div>
+      <div class="sess-card">
+        <div class="sess-thumb"><div class="sess-thumb-bg"></div><span class="sess-ico">🔴</span></div>
+        <div class="sess-body"><div class="sess-title">London Open Breakout Strategy — Recording</div><div class="sess-meta"><span class="stag rec">Recording</span><span class="sess-time">May 16 · 72 min</span></div></div>
+        <div class="sess-foot"><span class="sess-att">▶ 1,240 views</span><button class="join-btn" onclick="openRoom()">Watch</button></div>
+      </div>
+      <div class="sess-card">
+        <div class="sess-thumb"><div class="sess-thumb-bg"></div><span class="sess-ico">📊</span></div>
+        <div class="sess-body"><div class="sess-title">Weekly Market Structure Review</div><div class="sess-meta"><span class="stag soon">Tomorrow</span><span class="sess-time">May 20 · 10:00 UTC</span></div></div>
+        <div class="sess-foot"><span class="sess-att">👥 29 registered</span><button class="join-btn out">Register</button></div>
+      </div>
+      <div class="sess-card">
+        <div class="sess-thumb"><div class="sess-thumb-bg"></div><span class="sess-ico">💬</span></div>
+        <div class="sess-body"><div class="sess-title">Risk Management Q&amp;A — Office Hours</div><div class="sess-meta"><span class="stag class">Class</span><span class="sess-time">May 21 · 15:00 UTC</span></div></div>
+        <div class="sess-foot"><span class="sess-att">👥 18 registered</span><button class="join-btn out">Register</button></div>
+      </div>
+      <div class="sess-card">
+        <div class="sess-thumb"><div class="sess-thumb-bg"></div><span class="sess-ico">🤖</span></div>
+        <div class="sess-body"><div class="sess-title">Algo Bot Demo — How Signals Are Generated</div><div class="sess-meta"><span class="stag rec">Recording</span><span class="sess-time">May 12 · 45 min</span></div></div>
+        <div class="sess-foot"><span class="sess-att">▶ 892 views</span><button class="join-btn" onclick="openRoom()">Watch</button></div>
+      </div>
+    </div>
+    <div id="room-container" class="room" style="display:none">
+      <div class="room-vid">
+        <div class="room-vid-bg"></div>
+        <div class="room-ph"><span class="room-ph-ico">🎙️</span><div class="room-ph-h">NY Session — Live Trading</div><div class="room-ph-s">// stream active · 142 participants</div></div>
+        <div class="speakers"><div class="spk-tile"><span>👤</span><span class="spk-name">Host</span></div><div class="spk-tile"><span>👤</span><span class="spk-name">You</span></div></div>
+      </div>
+      <div class="room-controls">
+        <div class="ctrl" title="Mute">🎤</div>
+        <div class="ctrl" title="Camera">📷</div>
+        <div class="ctrl" title="Share Screen">🖥️</div>
+        <div class="ctrl" title="Raise Hand">✋</div>
+        <div class="ctrl" title="Signals">📊</div>
+        <div class="ctrl" title="Chat">💬</div>
+        <div class="ctrl danger" title="Leave" onclick="closeRoom()">📵</div>
+      </div>
+      <div class="room-lower">
+        <div class="rl-panel">
+          <div class="rl-label">// Live Chat</div>
+          <div class="chat-bubble"><div class="cb-av">T</div><div class="cb-body"><div class="cb-name">Themba_FX</div><div class="cb-text">XAUUSD setup looking clean 🔥 already in from 2341</div></div></div>
+          <div class="chat-bubble"><div class="cb-av">K</div><div class="cb-body"><div class="cb-name">Kemi_Trades</div><div class="cb-text">TP1 hit on GBPUSD — moved to breakeven now</div></div></div>
+          <div class="chat-bubble"><div class="cb-av">J</div><div class="cb-body"><div class="cb-name">JayFunded</div><div class="cb-text">What lot size for 50k funded? Using 0.25 — is that right?</div></div></div>
+          <div class="chat-bubble"><div class="cb-av" style="background:var(--glow2)">✦</div><div class="cb-body"><div class="cb-name" style="color:var(--gold2)">Astral_Host</div><div class="cb-text">@JayFunded for 50k at 0.5% risk, 0.25 lots is correct ✅</div></div></div>
+        </div>
+        <div class="rl-panel">
+          <div class="rl-label">// Participants (142)</div>
+          <div class="participant-row"><div class="pr-av" style="background:var(--glow2)">⭐</div><span class="pr-name">Astral Host</span><span class="pr-role r-host">Host</span></div>
+          <div class="participant-row"><div class="pr-av" style="background:rgba(85,146,224,.15)">T</div><span class="pr-name">Themba_FX</span><span class="pr-role r-mem">Member</span></div>
+          <div class="participant-row"><div class="pr-av" style="background:rgba(76,175,125,.15)">K</div><span class="pr-name">Kemi_Trades</span><span class="pr-role r-mem">Member</span></div>
+          <div class="participant-row"><div class="pr-av" style="background:rgba(224,85,85,.15)">J</div><span class="pr-name">JayFunded</span><span class="pr-role r-mem">Member</span></div>
+          <div class="participant-row"><div class="pr-av" style="background:rgba(200,162,60,.15)">Y</div><span class="pr-name">You</span><span class="pr-role r-mem">Member</span></div>
+        </div>
+        <div class="rl-panel">
+          <div class="rl-label">// Session Signals</div>
+          <div class="msig"><span class="msig-dir buy">BUY</span><span class="msig-pair">XAUUSD</span><span class="msig-info">E:2341.50 · TP 2354</span><span class="msig-st act">+82p</span></div>
+          <div class="msig"><span class="msig-dir buy">BUY</span><span class="msig-pair">GBPUSD</span><span class="msig-info">E:1.2720 · TP 1.2778</span><span class="msig-st act">+34p</span></div>
+          <div class="msig"><span class="msig-dir sell">SELL</span><span class="msig-pair">EURUSD</span><span class="msig-info">E:1.0821 · TP 1.0768</span><span class="msig-st cls">+53p ✓</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ TELEGRAM ════════════════ -->
+<div id="page-telegram" class="page">
+  <div class="tg-wrap">
+    <div class="pg-head" style="margin-bottom:24px">
+      <div><div class="sec-tag" style="margin-bottom:6px">// Automation</div><h2 class="pg-title">Telegram <em>Bot Setup</em></h2></div>
+    </div>
+    <div class="tg-hero-box">
+      <div class="tg-ico">✈️</div>
+      <div class="tg-hero-content">
+        <div class="tg-hero-title">Connect Astral Algo to Your Telegram Group</div>
+        <div class="tg-hero-desc">Automate signal delivery, risk alerts, and session notifications directly to your traders. Zero delay, fully formatted, prop firm compliant.</div>
+      </div>
+      <button class="btn-tg">✈️ Open in Telegram</button>
+    </div>
+    <div class="tg-grid">
+      <div class="tg-sec">
+        <div class="ts-hd"><span>⚙️</span><h3>Bot Configuration</h3></div>
+        <div class="ts-bd">
+          <div class="fg"><label class="f-lbl">Bot Token</label><input class="f-inp" type="password" placeholder="Paste BotFather token..." value="7134●●●●:AAF●●●●●●"/></div>
+          <div class="fg"><label class="f-lbl">Group / Channel ID</label><input class="f-inp" type="text" placeholder="-100123456789"/></div>
+          <div class="fr2">
+            <div class="fg"><label class="f-lbl">Signal Mode</label><select class="f-sel"><option>Full Signal</option><option>Entry Only</option><option>Entry + TP1</option></select></div>
+            <div class="fg"><label class="f-lbl">Default Risk %</label><input class="f-inp" type="number" value="0.5" step="0.1" min="0.1" max="2"/></div>
+          </div>
+          <div class="fr2">
+            <div class="fg"><label class="f-lbl">Account Size ($)</label><input class="f-inp" type="number" value="50000"/></div>
+            <div class="fg"><label class="f-lbl">Prop Firm</label><select class="f-sel"><option>FTMO</option><option>MyFundedFx</option><option>The Funded Trader</option><option>E8 Funding</option><option>Custom</option></select></div>
+          </div>
+          <button class="btn-g" style="width:100%;justify-content:center;margin-top:4px">Save Configuration</button>
+        </div>
+      </div>
+      <div class="tg-sec">
+        <div class="ts-hd"><span>🔔</span><h3>Notification Settings</h3></div>
+        <div class="ts-bd">
+          <div class="tog-row"><div><div class="tog-lbl">Signal Alerts</div><div class="tog-sub">Send buy/sell signals instantly</div></div><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="tog-row"><div><div class="tog-lbl">TP Hit Notifications</div><div class="tog-sub">Alert when targets are reached</div></div><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="tog-row"><div><div class="tog-lbl">Stop Loss Alerts</div><div class="tog-sub">Alert on stop hit</div></div><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="tog-row"><div><div class="tog-lbl">News Blackout Warning</div><div class="tog-sub">Warn 30 min before high-impact news</div></div><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="tog-row"><div><div class="tog-lbl">Daily Loss Warning</div><div class="tog-sub">Alert at 80% of daily limit</div></div><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="tog-row"><div><div class="tog-lbl">Session Reminders</div><div class="tog-sub">Remind 15 min before live sessions</div></div><div class="tog" onclick="this.classList.toggle('on')"></div></div>
+          <div class="tog-row"><div><div class="tog-lbl">Lot Size in Alert</div><div class="tog-sub">Include calculated lot per account size</div></div><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="msg-box">
+      <div class="msg-box-lbl">// Signal Message Preview</div>
+      <div class="msg-pre"><span class="mb">⚡ ASTRAL ALGO — BUY SIGNAL</span>
+
+<span class="mg">Pair:</span>      XAUUSD (Gold)
+<span class="mg">Direction:</span> <span class="mb">BUY 🟢</span>
+<span class="mg">Entry:</span>     2341.50 — 2344.00
+<span class="mg">TP 1:</span>     2354.00 (+82 pips)
+<span class="mg">TP 2:</span>     2368.00 (+164 pips)
+<span class="mg">TP 3:</span>     2385.00 (+280 pips)
+<span class="mr">SL:</span>       2332.00 (-64 pips)
+
+<span class="mg">Risk:</span>     0.5% | Lot: 0.25 (50k acc)
+<span class="mg">Session:</span>  New York Open
+<span class="mg">Confidence:</span> 92% 🔵
+
+<span class="mm">⚠️ PropFirm Mode: Max 1% risk enforced
+📊 No news events within 30 min ✅
+🛡️ FTMO Phase 1 compliant
+
+— Astral Algo © 2026</span></div>
+    </div>
+    <div style="display:flex;gap:14px;margin-top:18px;flex-wrap:wrap">
+      <button class="btn-g">🚀 Activate Bot</button>
+      <button class="btn-o">📋 Send Test Message</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ PRICING ════════════════ -->
+<div id="page-pricing" class="page">
+  <div class="price-wrap">
+    <div style="text-align:center;margin-bottom:48px">
+      <div class="sec-tag" style="display:inline-block;margin-bottom:14px">// Subscription Plans</div>
+      <h2 class="sec-h" style="text-align:center">Choose Your <em>Edge</em></h2>
+      <div class="gold-rule" style="margin:18px auto"></div>
+      <p class="sec-p" style="margin:0 auto;text-align:center">All plans include prop firm compliance filters. Upgrade or cancel anytime.</p>
+    </div>
+    <div class="price-toggle">
+      <span>Monthly</span>
+      <div class="pt" id="billing-toggle" onclick="toggleBilling()"></div>
+      <span>Annual</span>
+      <span class="save-tag">Save 30%</span>
+    </div>
+    <div class="disclaimer">⚠️ RISK DISCLAIMER: Trading forex carries significant risk of loss. Astral Algo signals are for educational purposes and do not constitute financial advice. Past performance is not indicative of future results. Only trade with capital you can afford to lose.</div>
+    <div class="plans">
+      <div class="plan">
+        <div class="plan-h"><div class="plan-name">Starter</div><div class="plan-tag">For new prop firm traders</div><div class="plan-price" id="p1"><sup>$</sup>29<sub>/mo</sub></div><div class="plan-per" id="p1-per">Billed monthly</div></div>
+        <div class="plan-feats">
+          <div class="pf"><span class="ck">✦</span>Up to 5 signals/day</div>
+          <div class="pf"><span class="ck">✦</span>Telegram alert delivery</div>
+          <div class="pf"><span class="ck">✦</span>PropFirm compliance filter</div>
+          <div class="pf"><span class="ck">✦</span>Lot size calculator</div>
+          <div class="pf"><span class="ck">✦</span>EURUSD &amp; GBPUSD only</div>
+          <div class="pf dim"><span class="cx">✗</span>Live sessions access</div>
+          <div class="pf dim"><span class="cx">✗</span>XAUUSD &amp; Indices</div>
+          <div class="pf dim"><span class="cx">✗</span>Masterclass recordings</div>
+        </div>
+        <div class="plan-foot"><button class="btn-plan" onclick="showPage('telegram')">Get Started</button></div>
+      </div>
+      <div class="plan hot">
+        <div class="plan-badge">✦ Most Popular</div>
+        <div class="plan-h"><div class="plan-name">Pro</div><div class="plan-tag">For serious funded traders</div><div class="plan-price" id="p2"><sup>$</sup>79<sub>/mo</sub></div><div class="plan-per" id="p2-per">Billed monthly</div></div>
+        <div class="plan-feats">
+          <div class="pf"><span class="ck">✦</span>Unlimited signals — all pairs</div>
+          <div class="pf"><span class="ck">✦</span>Telegram + Web dashboard</div>
+          <div class="pf"><span class="ck">✦</span>PropFirm compliance + alerts</div>
+          <div class="pf"><span class="ck">✦</span>XAUUSD, Indices, all Majors</div>
+          <div class="pf"><span class="ck">✦</span>Weekly live sessions</div>
+          <div class="pf"><span class="ck">✦</span>All session recordings</div>
+          <div class="pf"><span class="ck">✦</span>Risk management suite</div>
+          <div class="pf"><span class="ck">✦</span>Private Telegram group</div>
+          <div class="pf dim"><span class="cx">✗</span>1-on-1 mentorship</div>
+        </div>
+        <div class="plan-foot"><button class="btn-plan prime" onclick="showPage('telegram')">Start Pro Trial</button></div>
+      </div>
+      <div class="plan">
+        <div class="plan-h"><div class="plan-name">Elite</div><div class="plan-tag">For traders scaling accounts</div><div class="plan-price" id="p3"><sup>$</sup>149<sub>/mo</sub></div><div class="plan-per" id="p3-per">Billed monthly</div></div>
+        <div class="plan-feats">
+          <div class="pf"><span class="ck">✦</span>Everything in Pro</div>
+          <div class="pf"><span class="ck">✦</span>Monthly 1-on-1 review</div>
+          <div class="pf"><span class="ck">✦</span>Custom PropFirm rules setup</div>
+          <div class="pf"><span class="ck">✦</span>Early signal access (5 min)</div>
+          <div class="pf"><span class="ck">✦</span>Daily accountability check-in</div>
+          <div class="pf"><span class="ck">✦</span>Multi-account signal routing</div>
+          <div class="pf"><span class="ck">✦</span>Elite Discord channel</div>
+          <div class="pf"><span class="ck">✦</span>Priority support (2hr)</div>
+        </div>
+        <div class="plan-foot"><button class="btn-plan" onclick="showPage('telegram')">Go Elite</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── ROUTER ── */
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav-links a[id^="nl-"]').forEach(a=>a.classList.remove('active'));
+  const nl=document.getElementById('nl-'+id);
+  if(nl)nl.classList.add('active');
+  closeMob();window.scrollTo(0,0);
+  if(id==='signals')renderSigs();
+}
+
+/* ── MOBILE MENU ── */
+function toggleMenu(){document.getElementById('mob-nav').classList.toggle('open');document.getElementById('burger').classList.toggle('open')}
+function closeMob(){document.getElementById('mob-nav').classList.remove('open');document.getElementById('burger').classList.remove('open')}
+
+/* ── PAIRS DATA ── */
+const PAIRS=[
+  {p:'EURUSD',v:1.0834,d:'up'},{p:'GBPUSD',v:1.2741,d:'up'},
+  {p:'USDJPY',v:154.82,d:'dn'},{p:'XAUUSD',v:2344.10,d:'up'},
+  {p:'USDCHF',v:0.9024,d:'dn'},{p:'AUDUSD',v:0.6591,d:'up'},
+  {p:'USDCAD',v:1.3672,d:'dn'},{p:'NZDUSD',v:0.6024,d:'up'},
+  {p:'GBPJPY',v:197.34,d:'up'},{p:'EURJPY',v:167.71,d:'up'},
+  {p:'US30',v:39841,d:'up'},{p:'NAS100',v:17620,d:'up'},
+];
+function fmt(v,p){return p==='US30'||p==='NAS100'?v.toFixed(0):v>100?v.toFixed(2):v.toFixed(4)}
+function chg(v,d){const c=(Math.random()*.8+.05).toFixed(2);return d==='up'?`+${c}%`:`-${c}%`}
+
+/* ── TICKER ── */
+function buildTicker(){
+  const w=document.getElementById('ticker-scroll');if(!w)return;
+  let h='';
+  for(let i=0;i<2;i++){
+    PAIRS.forEach(d=>{
+      h+=`<span class="tk-item"><span class="tk-pair">${d.p}</span><span class="tk-price">${fmt(d.v,d.p)}</span><span class="tk-chg ${d.d}">${chg(d.v,d.d)}</span></span>`;
+    });
+  }
+  w.innerHTML=h;
+}
+
+/* ── LIVE RATES ── */
+function buildRates(){
+  const el=document.getElementById('live-rates');if(!el)return;
+  el.innerHTML=PAIRS.slice(0,6).map(d=>`
+    <div class="rate-row">
+      <span class="rr-pair">${d.p}</span>
+      <span class="rr-price" data-base="${d.v}" data-pair="${d.p}">${fmt(d.v,d.p)}</span>
+      <span class="rr-chg ${d.d}">${chg(d.v,d.d)}</span>
+    </div>`).join('');
+}
+function driftPrices(){
+  document.querySelectorAll('.rr-price').forEach(el=>{
+    const base=parseFloat(el.dataset.base);
+    const pair=el.dataset.pair;
+    const drift=(Math.random()-.5)*.0008*base;
+    el.textContent=fmt(base+drift,pair);
+  });
+}
+setInterval(driftPrices,2400);
+
+/* ── SIGNALS ── */
+const SIGS=[
+  {pair:'XAUUSD',dir:'buy',entry:'2341.50',tp1:'2354.00',tp2:'2368.00',sl:'2332.00',pips:'+82p',prog:68,session:'NY Open',tag:'ACTIVE',time:'14:02 UTC',risk:'0.5%'},
+  {pair:'GBPUSD',dir:'buy',entry:'1.2720',tp1:'1.2778',tp2:'1.2830',sl:'1.2681',pips:'+58p',prog:45,session:'London',tag:'ACTIVE',time:'10:15 UTC',risk:'0.5%'},
+  {pair:'EURUSD',dir:'sell',entry:'1.0821',tp1:'1.0768',tp2:'1.0720',sl:'1.0860',pips:'+53p',prog:100,session:'London',tag:'CLOSED',time:'09:30 UTC',risk:'0.5%'},
+  {pair:'USDJPY',dir:'sell',entry:'154.80',tp1:'153.90',tp2:'153.10',sl:'155.40',pips:'+90p',prog:30,session:'Tokyo',tag:'ACTIVE',time:'03:20 UTC',risk:'0.5%'},
+  {pair:'GBPJPY',dir:'buy',entry:'197.10',tp1:'197.90',tp2:'198.60',sl:'196.40',pips:'+80p',prog:55,session:'NY',tag:'ACTIVE',time:'13:45 UTC',risk:'0.5%'},
+  {pair:'XAUUSD',dir:'sell',entry:'2355.00',tp1:'2342.00',tp2:'2328.00',sl:'2364.00',pips:'+130p',prog:100,session:'NY',tag:'CLOSED',time:'Yesterday',risk:'0.5%'},
+  {pair:'AUDUSD',dir:'buy',entry:'0.6582',tp1:'0.6620',tp2:'0.6660',sl:'0.6555',pips:'+38p',prog:20,session:'Sydney',tag:'ACTIVE',time:'01:00 UTC',risk:'0.5%'},
+  {pair:'US30',dir:'buy',entry:'39650',tp1:'39820',tp2:'39990',sl:'39520',pips:'+170p',prog:80,session:'NY',tag:'ACTIVE',time:'14:30 UTC',risk:'0.5%'},
+];
+let sigFilter='all';
+function filterSigs(el,f){
+  document.querySelectorAll('.pill').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');sigFilter=f;renderSigs();
+}
+function renderSigs(){
+  const grid=document.getElementById('sig-grid');if(!grid)return;
+  let data=SIGS;
+  if(sigFilter==='buy')data=data.filter(s=>s.dir==='buy');
+  else if(sigFilter==='sell')data=data.filter(s=>s.dir==='sell');
+  else if(sigFilter==='active')data=data.filter(s=>s.tag==='ACTIVE');
+  else if(sigFilter==='closed')data=data.filter(s=>s.tag==='CLOSED');
+  grid.innerHTML=data.map(s=>`
+    <div class="sig-card">
+      <div class="sc-head"><span class="sc-pair">${s.pair}</span><span class="sc-dir ${s.dir}">${s.dir.toUpperCase()}</span></div>
+      <div class="sc-body">
+        <div class="sc-row"><span class="sc-k">Entry</span><span class="sc-v">${s.entry}</span></div>
+        <div class="sc-row"><span class="sc-k">TP 1</span><span class="sc-v tp">${s.tp1}</span></div>
+        <div class="sc-row"><span class="sc-k">TP 2</span><span class="sc-v tp">${s.tp2}</span></div>
+        <div class="sc-row"><span class="sc-k">Stop Loss</span><span class="sc-v sl">${s.sl}</span></div>
+        <div class="sc-row"><span class="sc-k">Gain</span><span class="sc-v au">${s.pips}</span></div>
+        <div class="sc-row"><span class="sc-k">Risk / Trade</span><span class="sc-v">${s.risk}</span></div>
+      </div>
+      <div class="sc-bar"><div class="sc-bar-fill" style="width:${s.prog}%"></div></div>
+      <div class="sc-foot"><span class="sc-time">🕐 ${s.time} · ${s.session}</span><span class="sc-tag2">${s.tag}</span></div>
+    </div>`).join('');
+}
+
+/* ── ROOM ── */
+function openRoom(){const r=document.getElementById('room-container');r.style.display='block';r.scrollIntoView({behavior:'smooth'})}
+function closeRoom(){document.getElementById('room-container').style.display='none'}
+
+/* ── BILLING TOGGLE ── */
+let annual=false;
+function toggleBilling(){
+  annual=!annual;
+  document.getElementById('billing-toggle').classList.toggle('ann',annual);
+  const prices=annual
+    ?[['p1','<sup>$</sup>19<sub>/mo</sub>','Billed $228/yr'],['p2','<sup>$</sup>54<sub>/mo</sub>','Billed $649/yr'],['p3','<sup>$</sup>104<sub>/mo</sub>','Billed $1,249/yr']]
+    :[['p1','<sup>$</sup>29<sub>/mo</sub>','Billed monthly'],['p2','<sup>$</sup>79<sub>/mo</sub>','Billed monthly'],['p3','<sup>$</sup>149<sub>/mo</sub>','Billed monthly']];
+  prices.forEach(([id,v,per])=>{
+    document.getElementById(id).innerHTML=v;
+    const pel=document.getElementById(id+'-per');if(pel)pel.textContent=per;
+  });
+}
+
+/* ── INIT ── */
+buildTicker();buildRates();renderSigs();
+</script>
+</body>
+</html>
